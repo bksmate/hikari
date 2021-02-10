@@ -11,6 +11,9 @@
 </head>
 
 <body>
+    <div>
+        <span id="console"></span>
+    </div>
     <div class="game-container game-2048-container">
         <div class="game-2048-grid">
             <div class="game-2048-row">
@@ -63,6 +66,7 @@
             });
             var bestSize = getBestSize();
             console.log(bestSize);
+            $('#console').text(bestSize);
 
             var style = '';
             style +=
