@@ -7,7 +7,8 @@
     <script type="text/javascript" src="lib/jquery.js"></script>
     <script type="text/javascript" src="lib/hikari.js"></script>
     <!--<link rel="stylesheet" href="lib/2048/main.css">-->
-    <style id="dynamic-css"></style>
+    <style>
+    </style>
 </head>
 
 <body>
@@ -16,43 +17,17 @@
     </div>
     <div class="game-container game-2048-container">
         <div class="game-2048-grid">
-            <div class="game-2048-row">
-                <div class="game-2048-cell"></div>
-                <div class="game-2048-cell"></div>
-                <div class="game-2048-cell"></div>
-                <div class="game-2048-cell"></div>
-            </div>
-            <div class="game-2048-row">
-                <div class="game-2048-cell"></div>
-                <div class="game-2048-cell"></div>
-                <div class="game-2048-cell"></div>
-                <div class="game-2048-cell"></div>
-            </div>
-            <div class="game-2048-row">
-                <div class="game-2048-cell"></div>
-                <div class="game-2048-cell"></div>
-                <div class="game-2048-cell"></div>
-                <div class="game-2048-cell"></div>
-            </div>
-            <div class="game-2048-row">
-                <div class="game-2048-cell"></div>
-                <div class="game-2048-cell"></div>
-                <div class="game-2048-cell"></div>
-                <div class="game-2048-cell"></div>
-            </div>
         </div>
-        <div class="tile-container">
-            <div class="tile tile-2 tile-position-1-3 tile-new">
-                <div class="tile-inner">2</div>
-            </div>
-            <div class="tile tile-2 tile-position-2-1 tile-new">
-                <div class="tile-inner">2</div>
-            </div>
+        <!--<div class="game-2048-units">
+            <div class="game-2048-tile game-2048-tile-0-0"><img src="resources/2048/level-1.jpg" /></div>
         </div>
+        <div class="game-2048-units">
+            <div class="game-2048-tile game-2048-tile-3-2"><img src="resources/2048/level-1.jpg" /></div>
+        </div>-->
     </div>
     <script type="text/javascript" defer>
         $(document).ready(function() {
-
+            // 初始化CSS
             $('html').css({
                 width: '100%',
                 height: '100%',
@@ -64,61 +39,210 @@
                 height: '100%',
                 margin: '0 auto'
             });
-            var bestSize = getBestSize();
-            console.log(bestSize);
-            $('#console').text(bestSize);
-
+            // 计算一些参数
+            var count = 5;
+            var param = {
+                count: count,
+                matrix: []
+            };
+            // 获取最小公倍数
+            getBestRatio(param);
+            var ratio = param.ratio;
+            // 最适合当前窗体的容器边长
+            getBestSize(param);
+            var size = param.size;
+            // 获取单元格边长和缝隙宽度
+            var cellSize = size * 5 / (6 * count + 1);
+            var splitSize = cellSize / 5;
+            $('#console').text(size);
             var style = '';
             style +=
                 '.game-2048-container {' +
-                'width: ' + bestSize + 'px;' +
-                'height: ' + bestSize + 'px;' +
+                'width: ' + size + 'px;' +
+                'height: ' + size + 'px;' +
                 'background-color: ' + '#bbada0' + ';' +
                 'margin: 0 auto;' +
-                'border-radius: 10px' +
+                'border-radius: 10px;' +
+                'position: relative;' +
                 '}\n' +
                 '.game-2048-grid {' +
                 'width: 100%;' +
                 'height: 100%;' +
                 'margin: 0 auto;' +
-                'padding-top: 4%;' +
+                'padding-top: ' + splitSize + 'px;' +
                 '}\n' +
                 '.game-2048-row {' +
                 'width: 100%;' +
-                'height: 20%;' +
-                'margin-bottom: 4%;' +
+                'height: ' + cellSize + 'px;' +
+                'margin-bottom: ' + splitSize + 'px;' +
                 '}\n' +
                 '.game-2048-cell {' +
-                'width: 20%;' +
+                'width: ' + cellSize + 'px;' +
                 'height: 100%;' +
-                'margin-left: 4%;' +
+                'margin-left: ' + splitSize + 'px;' +
                 'float: left;' +
-                'background-color: rgba(238,228,218,.35);' +
+                'background-color: rgba(238, 228, 218, .35);' +
+                '}\n' +
+                '.game-2048-units {' +
+                'width: 100%;' +
+                'height: 100%;' +
+                'top: 0;' +
+                'left: 0;' +
+                'position: absolute;' +
+                '}\n' +
+                '.game-2048-tile {' +
+                'width: ' + cellSize + 'px;' +
+                'height: ' + cellSize + 'px;' +
+                'background-color: aquamarine;' +
+                'position: absolute;' +
+                'animation: game-2048-tile-appear 200ms ease 100ms;' +
+                '-moz-animation: game-2048-tile-appear 200ms ease 100ms;' +
+                '-webkit-animation: game-2048-tile-appear 200ms ease 100ms;' +
+                '-o-animation: game-2048-tile-appear 200ms ease 100ms;' +
+                '}\n' +
+                '.game-2048-tile>img {' +
+                'width: 100%;' +
+                'height: 100%;' +
+                'border-radius: 10px;' +
+                '}\n' +
+                '@keyframes game-2048-tile-appear {' +
+                '0% {' +
+                'opacity: 0;' +
+                'transform: scale(0);' +
+                '}' +
+                '100% {' +
+                'opacity: 1;' +
+                'transform: scale(1);' +
+                '}' +
                 '}\n';
-
+            var rowS = '<div class="game-2048-row"></div>';
+            var cellS = '<div class="game-2048-cell"></div>';
+            for (var i$ = 0; i$ < count; i$++) {
+                var $row = $(rowS);
+                param.matrix[i$] = [];
+                for (var j$ = 0; j$ < count; j$++) {
+                    param.matrix[i$][j$] = 0;
+                    style +=
+                        '.game-2048-tile-' + i$ + '-' + j$ + '{' +
+                        'left: ' + (splitSize + (splitSize + cellSize) * j$) + 'px;' +
+                        'top: ' + (splitSize + (splitSize + cellSize) * i$) + 'px;' +
+                        '}\n';
+                    $row.append(cellS);
+                }
+                $('.game-2048-grid').append($row);
+            }
             hikari.addGlobalStyle('game-2048', style);
+            // 绑定事件
+            console.log(param);
+            $(document).keydown(function(e) {
+                if (e.keyCode === 39) {
+                    left(param);
+                }
+                /*if (e && e.keyCode == 38 || e && e.keyCode == 37) { //上,左
+                    alert('38=上键，37=左键');
+                }
+
+                if (e && e.keyCode == 40 || e && e.keyCode == 39) { //下,右
+                    alert('40=下键，39=右键');
+                }*/
+            });
         });
+        /**
+        根据方块数获取最小公倍数
+        */
+        function getBestRatio(param) {
+            /*
+            @x = count;
+            @y = length;
+            @z = Ratio
+            xy + (x+1)(y/5)=z
+            =>y=5z/(6x+1)
+            */
+            var count = param.count;
+            var a = 5,
+                b = 6 * count + 1;
+            var c = a > b ? a : b;
+            var d = a > b ? b : a;
+            for (var i$ = 1; i$ <= d; i$++) {
+                if (c * i$ % d == 0) {
+                    param.ratio = c * i$;
+                    return;
+                }
+            }
+        }
         /**
         获取符合当前屏幕最适合的25的倍数.
         */
-        function getBestSize() {
+        function getBestSize(param) {
             var h = $('body').height(),
                 w = $('body').width(),
                 s, t, m,
-                i = 1;
+                i = 1,
+                r = param.ratio;
             s = h > w ? w : h;
-            m /= 2;
             m = h > w ? h : w;
-            s -= 40;
+            m *= (2 / 3);
             while (true) {
-                t = i * 25;
+                t = i * r;
                 if (t > s || t > m) {
                     break;
                 }
                 i++;
             }
-            s = t - 25;
-            return s;
+            s = t - r;
+            if (0 == s) {
+                alert("浏览器窗口太小或系数过大!");
+                return;
+            }
+            param.size = s;
+        }
+
+        function left(param) {
+            for (var i$ = 0; i$ < param.count; i$ ++) {
+                var i1 = 0, i2 = 0;
+                var v1 = 0, v2 = 0;
+                for (var j$ = param.count - 1; j$ >= 0; j$ --) {
+                    v2 = param.matrix[i$][j$];
+                    if (v1 !== 0 && v1 === v2) {
+                        
+                    }
+                }
+                
+            }
+            
+            var count = 0;
+            var sum = 0;
+            // 检查可用格子数量
+            for (var i$ = 0; i$ < param.count; i$++) {
+                if (param.matrix[i$][0] == 0) {
+                    sum++;
+                }
+            }
+            // 没有可用的就返回
+            if (sum == 0) {
+                return;
+            }
+            if (sum < 3) {
+                count = 1;
+            }
+            if (sum == 3) {
+                count = Math.random() > 0.5 ? 2 : 1;
+            }
+            if (sum > 3) {
+                count = 2;
+            }
+            sum = 0;
+            var index, value, level;
+            while (sum < count) {
+                index = parseInt(Math.random() * param.count);
+                if (param.matrix[index][0] == 0) {
+                    sum++;
+                    value = Math.random() > 0.5 ? 4 : 2;
+                    param.matrix[index][0] = value;
+                    level = Math.log2(value);
+                    $('.game-2048-container').append('<div class="game-2048-units"><div class="game-2048-tile game-2048-tile-' + index + '-0"><img src="resources/2048/level-' + level + '.jpg" /></div></div>');
+                }
+            }
         }
 
     </script>
