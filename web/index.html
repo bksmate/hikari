@@ -199,25 +199,25 @@
                     if (y3 >= x3) {
                         down(param);
                     } else {
-                        right(param);
+                        left(param);
                     }
                 } else if (y3 >= 0 && x3 < 0) {
                     if (y3 >= -1 * x3) {
                         down(param);
                     } else {
-                        left(param);
+                        right(param);
                     }
                 } else if (y3 < 0 && x3 >= 0) {
                     if (-1 * y3 >= x3) {
                         up(param);
                     } else {
-                        right(param);
+                        left(param);
                     }
                 } else if (y3 < 0 && x3 < 0) {
                     if (-1 * y3 >= -1 * x3) {
                         up(param);
                     } else {
-                        left(param);
+                        right(param);
                     }
                 }
             });
@@ -607,7 +607,7 @@
             $img.bind('load', function() {
                 if (switcher && l > 2) {
                     var tempL = l + '';
-                    if (l > 4) {
+                    if (l > 12) {
                         tempL = '0';
                     }
                     if (!!!tips[tempL].flag) {
