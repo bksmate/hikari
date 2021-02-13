@@ -29,6 +29,7 @@
     <script type="text/javascript" defer>
         var param;
         var switcher = true;
+        var x1, y1, x2, y2;
         var tips = {
             "3": {
                 msg: '双十一的购物，我给你买了三个直男礼物，分别是手电筒，移动电源，零食。我预感你会拿这些礼物，笑话我一辈子'
@@ -65,7 +66,7 @@
             }
         };
         $(document).ready(function() {
-            for (var i$ = 3; i$ < 13; i$ ++) {
+            for (var i$ = 3; i$ < 13; i$++) {
                 var $img = $('<img src="resources/2048/level-' + i$ + '.jpg" />');
                 $('body').append($img);
                 $img.hide();
@@ -182,6 +183,44 @@
             hikari.addGlobalStyle('game-2048', style);
             // 绑定事件
             console.log(param);
+            $(document).bind('touchstart', function(e) {
+                x1 = e.touches ? e.touches[0].pageX : e.originalEvent.touches[0].pageX;
+                y1 = e.touches ? e.touches[0].pageY : e.originalEvent.touches[0].pageY;
+                console.log(x1 + '|' + y1);
+            });
+            $(document).bind('touchend', function(e) {
+                x2 = e.changedTouches ? e.changedTouches[0].pageX : e.originalEvent.changedTouches[0].pageX;
+                y2 = e.changedTouches ? e.changedTouches[0].pageY : e.originalEvent.changedTouches[0].pageY;
+                console.log(x2 + '|' + y2);
+                var x3 = x2 - x1;
+                var y3 = y2 - y1;
+                validateTiles(param);
+                if (y3 >= 0 && x3 >= 0) {
+                    if (y3 >= x3) {
+                        down(param);
+                    } else {
+                        right(param);
+                    }
+                } else if (y3 >= 0 && x3 < 0) {
+                    if (y3 >= -1 * x3) {
+                        down(param);
+                    } else {
+                        left(param);
+                    }
+                } else if (y3 < 0 && x3 >= 0) {
+                    if (-1 * y3 >= x3) {
+                        up(param);
+                    } else {
+                        right(param);
+                    }
+                } else if (y3 < 0 && x3 < 0) {
+                    if (-1 * y3 >= -1 * x3) {
+                        up(param);
+                    } else {
+                        left(param);
+                    }
+                }
+            });
             $(document).keydown(function(e) {
                 if (param.animateCount !== 0) {
                     return;
@@ -198,6 +237,8 @@
                 } else if (e.keyCode === 40) {
                     validateTiles(param);
                     down(param);
+                } else {
+                    return;
                 }
                 console.clear();
                 console.log(param.matrix[0]);
