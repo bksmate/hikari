@@ -12,7 +12,7 @@
 </head>
 
 <body>
-    <div>
+    <div style="display: none;">
         <span id="console"></span>
     </div>
     <div class="game-container game-2048-container">
@@ -24,9 +24,52 @@
         <div class="game-2048-units">
             <div class="game-2048-tile game-2048-tile-3-2"><img src="resources/2048/level-1.jpg" /></div>
         </div>-->
+        <div class="game-2048-units"></div>
     </div>
     <script type="text/javascript" defer>
+        var param;
+        var switcher = true;
+        var tips = {
+            "3": {
+                msg: '双十一的购物，我给你买了三个直男礼物，分别是手电筒，移动电源，零食。我预感你会拿这些礼物，笑话我一辈子'
+            },
+            "4": {
+                msg: '你给我的回礼是暖风机，维生素B和C，唇膏。都是我很需要和很想要的，真的很开心'
+            },
+            "5": {
+                msg: '你生日那天我送了你一个马克杯。生日当天才到，实在是不好意思。是我选了好久才选到的这样普通的礼物'
+            },
+            "6": {
+                msg: '我开始学习打毛线了，我发誓我一定要给你织个龙猫包包，这个先拿来练手吧'
+            },
+            "7": {
+                msg: '平安夜加班的时候收到了你的惊喜小礼物，明明说着不要平安节礼物，但是收到的一刹那还是特别特别开心。我要把订单保存起来'
+            },
+            "8": {
+                msg: '2020年12月30日晚上，我抱着皮卡丘在黄花机场T1栋等你。你认出了我，蹦蹦跳跳地对我挥手，我想，就是你了'
+            },
+            "9": {
+                msg: '2020年12月31日晚上，我们一起看了[崖上的波妞]。我们一起元旦跨年啦'
+            },
+            "10": {
+                msg: '2021年01月02日下午，我们一起去了我的母校中南大学。和心爱的你故地重游，充满了不一样的感觉。我感觉幸福极了'
+            },
+            '11': {
+                msg: '我们在黄土岭短暂地同居啦！我上班，你搞学术，感觉像梦一样'
+            },
+            '12': {
+                msg: '除夕晚上，我鼓起勇气要给你一个惊喜。我找了个借口溜了出来，问遍了一条街的店铺，最后买到了不是那么理想的烟花。我们放了会烟花，紧紧相拥。和你相遇真是太好了'
+            },
+            '0': {
+                msg: '我要跟你一起谱写更多的，更美好的未来。我爱你'
+            }
+        };
         $(document).ready(function() {
+            for (var i$ = 3; i$ < 13; i$ ++) {
+                var $img = $('<img src="resources/2048/level-' + i$ + '.jpg" />');
+                $('body').append($img);
+                $img.hide();
+            }
             // 初始化CSS
             $('html').css({
                 width: '100%',
@@ -40,10 +83,12 @@
                 margin: '0 auto'
             });
             // 计算一些参数
-            var count = 5;
-            var param = {
+            var count = 4;
+            var animateTime = '200ms';
+            param = {
                 count: count,
-                matrix: []
+                matrix: [],
+                animateCount: 0
             };
             // 获取最小公倍数
             getBestRatio(param);
@@ -54,6 +99,8 @@
             // 获取单元格边长和缝隙宽度
             var cellSize = size * 5 / (6 * count + 1);
             var splitSize = cellSize / 5;
+            param.cellSize = cellSize;
+            param.splitSize = splitSize;
             $('#console').text(size);
             var style = '';
             style +=
@@ -91,19 +138,20 @@
                 'position: absolute;' +
                 '}\n' +
                 '.game-2048-tile {' +
+                '-webkit-transition: all ' + animateTime + ';' +
+                '-moz-transition: all ' + animateTime + ';' +
+                '-o-transition: all ' + animateTime + ';' +
+                'transition: all ' + animateTime + ';' +
                 'width: ' + cellSize + 'px;' +
                 'height: ' + cellSize + 'px;' +
                 'background-color: aquamarine;' +
                 'position: absolute;' +
+                'border-radius: 10px;' +
+                'display: block;' +
                 'animation: game-2048-tile-appear 200ms ease 100ms;' +
                 '-moz-animation: game-2048-tile-appear 200ms ease 100ms;' +
                 '-webkit-animation: game-2048-tile-appear 200ms ease 100ms;' +
                 '-o-animation: game-2048-tile-appear 200ms ease 100ms;' +
-                '}\n' +
-                '.game-2048-tile>img {' +
-                'width: 100%;' +
-                'height: 100%;' +
-                'border-radius: 10px;' +
                 '}\n' +
                 '@keyframes game-2048-tile-appear {' +
                 '0% {' +
@@ -135,16 +183,28 @@
             // 绑定事件
             console.log(param);
             $(document).keydown(function(e) {
+                if (param.animateCount !== 0) {
+                    return;
+                }
                 if (e.keyCode === 39) {
+                    validateTiles(param);
                     left(param);
+                } else if (e.keyCode === 37) {
+                    validateTiles(param);
+                    right(param);
+                } else if (e.keyCode === 38) {
+                    validateTiles(param);
+                    up(param);
+                } else if (e.keyCode === 40) {
+                    validateTiles(param);
+                    down(param);
                 }
-                /*if (e && e.keyCode == 38 || e && e.keyCode == 37) { //上,左
-                    alert('38=上键，37=左键');
-                }
-
-                if (e && e.keyCode == 40 || e && e.keyCode == 39) { //下,右
-                    alert('40=下键，39=右键');
-                }*/
+                console.clear();
+                console.log(param.matrix[0]);
+                console.log(param.matrix[1]);
+                console.log(param.matrix[2]);
+                console.log(param.matrix[3]);
+                console.log(param.matrix[4]);
             });
         });
         /**
@@ -198,18 +258,34 @@
         }
 
         function left(param) {
-            for (var i$ = 0; i$ < param.count; i$ ++) {
-                var i1 = 0, i2 = 0;
-                var v1 = 0, v2 = 0;
-                for (var j$ = param.count - 1; j$ >= 0; j$ --) {
-                    v2 = param.matrix[i$][j$];
-                    if (v1 !== 0 && v1 === v2) {
-                        
+            for (var i$ = 0; i$ < param.count; i$++) {
+                var index = param.count - 1;
+                while (index >= 0) {
+                    for (var j$ = index - 1; j$ >= 0; j$--) {
+                        if (param.matrix[i$][index] === 0) {
+                            if (param.matrix[i$][j$] === 0) {
+                                // 初始0
+                                continue;
+                            } else {
+                                // 移动非0到记录位置并且更新
+                                move(i$, j$, i$, index, param, false);
+                                continue;
+                            }
+                        }
+                        if (param.matrix[i$][j$] === 0) {
+                            continue;
+                        } else if (param.matrix[i$][index] === param.matrix[i$][j$]) {
+                            move(i$, j$, i$, index, param, true);
+                            continue;
+                        } else {
+                            move(i$, j$, i$, index - 1, param, false);
+                            break;
+                        }
                     }
+                    index--;
                 }
-                
             }
-            
+
             var count = 0;
             var sum = 0;
             // 检查可用格子数量
@@ -240,9 +316,297 @@
                     value = Math.random() > 0.5 ? 4 : 2;
                     param.matrix[index][0] = value;
                     level = Math.log2(value);
-                    $('.game-2048-container').append('<div class="game-2048-units"><div class="game-2048-tile game-2048-tile-' + index + '-0"><img src="resources/2048/level-' + level + '.jpg" /></div></div>');
+                    createNewTile(index, 0, level);
                 }
             }
+        }
+
+        function right(param) {
+            for (var i$ = 0; i$ < param.count; i$++) {
+                var index = 0;
+                while (index < param.count) {
+                    for (var j$ = index + 1; j$ < param.count; j$++) {
+                        if (param.matrix[i$][index] === 0) {
+                            if (param.matrix[i$][j$] === 0) {
+                                // 初始0
+                                continue;
+                            } else {
+                                // 移动非0到记录位置并且更新
+                                move(i$, j$, i$, index, param, false);
+                                continue;
+                            }
+                        }
+                        if (param.matrix[i$][j$] === 0) {
+                            continue;
+                        } else if (param.matrix[i$][index] === param.matrix[i$][j$]) {
+                            move(i$, j$, i$, index, param, true);
+                            continue;
+                        } else {
+                            move(i$, j$, i$, index + 1, param, false);
+                            break;
+                        }
+                    }
+                    index++;
+                }
+            }
+
+            var count = 0;
+            var sum = 0;
+            // 检查可用格子数量
+            for (var i$ = 0; i$ < param.count; i$++) {
+                if (param.matrix[i$][param.count - 1] == 0) {
+                    sum++;
+                }
+            }
+            // 没有可用的就返回
+            if (sum == 0) {
+                return;
+            }
+            if (sum < 3) {
+                count = 1;
+            }
+            if (sum == 3) {
+                count = Math.random() > 0.5 ? 2 : 1;
+            }
+            if (sum > 3) {
+                count = 2;
+            }
+            sum = 0;
+            var index, value, level;
+            while (sum < count) {
+                index = parseInt(Math.random() * param.count);
+                if (param.matrix[index][param.count - 1] == 0) {
+                    sum++;
+                    value = Math.random() > 0.5 ? 4 : 2;
+                    param.matrix[index][param.count - 1] = value;
+                    level = Math.log2(value);
+                    createNewTile(index, (param.count - 1), level);
+                }
+            }
+        }
+
+        function up(param) {
+            for (var i$ = 0; i$ < param.count; i$++) {
+                var index = 0;
+                while (index < param.count) {
+                    for (var j$ = index + 1; j$ < param.count; j$++) {
+                        if (param.matrix[index][i$] === 0) {
+                            if (param.matrix[j$][i$] === 0) {
+                                // 初始0
+                                continue;
+                            } else {
+                                // 移动非0到记录位置并且更新
+                                move(j$, i$, index, i$, param, false);
+                                continue;
+                            }
+                        }
+                        if (param.matrix[j$][i$] === 0) {
+                            continue;
+                        } else if (param.matrix[index][i$] === param.matrix[j$][i$]) {
+                            move(j$, i$, index, i$, param, true);
+                            continue;
+                        } else {
+                            move(j$, i$, index + 1, i$, param, false);
+                            break;
+                        }
+                    }
+                    index++;
+                }
+            }
+
+            var count = 0;
+            var sum = 0;
+            // 检查可用格子数量
+            for (var i$ = 0; i$ < param.count; i$++) {
+                if (param.matrix[param.count - 1][i$] == 0) {
+                    sum++;
+                }
+            }
+            // 没有可用的就返回
+            if (sum == 0) {
+                return;
+            }
+            if (sum < 3) {
+                count = 1;
+            }
+            if (sum == 3) {
+                count = Math.random() > 0.5 ? 2 : 1;
+            }
+            if (sum > 3) {
+                count = 2;
+            }
+            sum = 0;
+            var index, value, level;
+            while (sum < count) {
+                index = parseInt(Math.random() * param.count);
+                if (param.matrix[param.count - 1][index] == 0) {
+                    sum++;
+                    value = Math.random() > 0.5 ? 4 : 2;
+                    param.matrix[param.count - 1][index] = value;
+                    level = Math.log2(value);
+                    createNewTile((param.count - 1), index, level);
+                }
+            }
+        }
+
+        function down(param) {
+            for (var i$ = 0; i$ < param.count; i$++) {
+                var index = param.count - 1;
+                while (index >= 0) {
+                    for (var j$ = index - 1; j$ >= 0; j$--) {
+                        if (param.matrix[index][i$] === 0) {
+                            if (param.matrix[j$][i$] === 0) {
+                                // 初始0
+                                continue;
+                            } else {
+                                // 移动非0到记录位置并且更新
+                                move(j$, i$, index, i$, param, false);
+                                continue;
+                            }
+                        }
+                        if (param.matrix[j$][i$] === 0) {
+                            continue;
+                        } else if (param.matrix[index][i$] === param.matrix[j$][i$]) {
+                            move(j$, i$, index, i$, param, true);
+                            continue;
+                        } else {
+                            move(j$, i$, index - 1, i$, param, false);
+                            break;
+                        }
+                    }
+                    index--;
+                }
+            }
+
+            var count = 0;
+            var sum = 0;
+            // 检查可用格子数量
+            for (var i$ = 0; i$ < param.count; i$++) {
+                if (param.matrix[0][i$] == 0) {
+                    sum++;
+                }
+            }
+            // 没有可用的就返回
+            if (sum == 0) {
+                return;
+            }
+            if (sum < 3) {
+                count = 1;
+            }
+            if (sum == 3) {
+                count = Math.random() > 0.5 ? 2 : 1;
+            }
+            if (sum > 3) {
+                count = 2;
+            }
+            sum = 0;
+            var index, value, level;
+            while (sum < count) {
+                index = parseInt(Math.random() * param.count);
+                if (param.matrix[0][index] == 0) {
+                    sum++;
+                    value = Math.random() > 0.5 ? 4 : 2;
+                    param.matrix[0][index] = value;
+                    level = Math.log2(value);
+                    createNewTile(0, index, level);
+                }
+            }
+        }
+
+        function move(i1, j1, i2, j2, param, combine) {
+            if (i1 === i2 && j1 === j2) {
+                return;
+            }
+            var $tile1 = $('.game-2048-tile-' + i1 + '-' + j1),
+                $tile2 = $('.game-2048-tile-' + i2 + '-' + j2);
+            $tile1.removeClass('game-2048-tile-' + i1 + '-' + j1);
+            $tile1.addClass('game-2048-tile-' + i2 + '-' + j2);
+            param.animateCount++;
+            var events = [
+                'transitionend',
+                'webkitTransitionEnd',
+                'mozTransitionEnd',
+                'oTransitionEnd'
+            ];
+            var level = 0;
+            if (!combine) {
+                param.matrix[i2][j2] = param.matrix[i1][j1];
+                param.matrix[i1][j1] = 0;
+            } else {
+                param.matrix[i2][j2] += param.matrix[i1][j1];
+                param.matrix[i1][j1] = 0;
+                level = Math.log2(param.matrix[i2][j2]);
+            }
+            var deleteFlag = false;
+            for (var i$ = 0; i$ < events.length; i$++) {
+                $tile1[0] && $tile1[0].addEventListener(events[i$], function() {
+                    if (!deleteFlag) {
+                        param.animateCount--;
+                    }
+                    if (combine && !deleteFlag) {
+                        /*$('.game-2048-tile-' + i1 + '-' + j1).remove();
+                        $('.game-2048-tile-' + i2 + '-' + j2).remove();*/
+                        $tile1.remove();
+                        $tile2.remove();
+                        createNewTile(i2, j2, level, true);
+                    }
+                    deleteFlag = true;
+                    if (0 == param.animateCount) {
+                        validateTiles(param);
+                    }
+                });
+            }
+        }
+
+        function createNewTile(i, j, l, c) {
+            var originalHtmlLength = $("body").html().length;
+            var $img = $('<img class="game-2048-tile game-2048-tile-' + i + '-' + j + '" src="resources/2048/level-' + l + '.jpg" level="' + l + '" />');
+            $('.game-2048-units').append($img);
+            if (!!!c) return;
+            $img.bind('load', function() {
+                if (switcher && l > 2) {
+                    var tempL = l + '';
+                    if (l > 4) {
+                        tempL = '0';
+                    }
+                    if (!!!tips[tempL].flag) {
+                        tips[tempL].flag = true;
+                        alert(tips[tempL].msg);
+                    }
+                }
+            })
+        }
+
+        function validateTiles(param) {
+            var matrix = param.matrix;
+            var count = param.count;
+            var a, b, c;
+            for (var i$ = 0; i$ < count; i$++) {
+                for (var j$ = 0; j$ < count; j$++) {
+                    var level = Math.log2(matrix[i$][j$]);
+                    $('.game-2048-tile-' + i$ + '-' + j$).each(function(i$$, o$$) {
+                        var $o = $(o$$);
+                        if (parseInt($o.attr('level')) !== level) {
+                            $o.remove();
+                        }
+                    });
+                }
+            }
+            for (var i$ = 0; i$ < count; i$++) {
+                for (var j$ = 0; j$ < count; j$++) {
+                    a = matrix[i$][j$];
+                    if (a === 0) {
+                        return;
+                    }
+                    if (i$ !== count - 1 && (matrix[i$ + 1][j$] === 0 || matrix[i$ + 1][j$] === a)) {
+                        return;
+                    }
+                    if (j$ !== count - 1 && (matrix[i$][j$ + 1] === 0 || matrix[i$][j$ + 1] === a)) {
+                        return;
+                    }
+                }
+            }
+            alert('Game Over');
         }
 
     </script>
