@@ -71,6 +71,20 @@
                 $('body').append($img);
                 $img.hide();
             }
+            var count;
+            while (true) {
+                var countS = prompt('请输入格子数量(建议4)', 4);
+                if (!/^[0-9]+\.?[0-9]*$/.test(countS)) {
+                    alert('要输入整数哦');
+                    continue;
+                }
+                count = parseInt(countS);
+                if (count >= 10 || count < 3) {
+                    alert('数字应该大于2小于10哦');
+                    continue;
+                }
+                break;
+            }
             // 初始化CSS
             $('html').css({
                 width: '100%',
@@ -84,7 +98,6 @@
                 margin: '0 auto'
             });
             // 计算一些参数
-            var count = 4;
             var animateTime = '200ms';
             param = {
                 count: count,
@@ -649,8 +662,5 @@
             }
             alert('Game Over');
         }
-
     </script>
-</body>
-
-</html>
+</body></html>
