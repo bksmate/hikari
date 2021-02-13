@@ -158,7 +158,10 @@
                 'transition: all ' + animateTime + ';' +
                 'width: ' + cellSize + 'px;' +
                 'height: ' + cellSize + 'px;' +
-                'background-color: aquamarine;' +
+                'line-height: ' + cellSize + 'px;' +
+                'text-align: center;' +
+                'font-size: ' + cellSize / 2 + 'px;' +
+                'background-color: #facfde;' +
                 'position: absolute;' +
                 'border-radius: 10px;' +
                 'display: block;' +
@@ -614,7 +617,13 @@
 
         function createNewTile(i, j, l, c) {
             var originalHtmlLength = $("body").html().length;
-            var $img = $('<img class="game-2048-tile game-2048-tile-' + i + '-' + j + '" src="resources/2048/level-' + l + '.jpg" level="' + l + '" />');
+            var $img;
+            if (l > 12) {
+                $img = $('<div class="game-2048-tile game-2048-tile-' + i + '-' + j + '" level="' + l + '" >' + Math.pow(2, l) + '</div>')
+            } else {
+                $img = $('<img class="game-2048-tile game-2048-tile-' + i + '-' + j + '" level="' + l + '" />');
+                $img.attr('src', 'resources/2048/level-' + l + '.jpg');
+            }
             $('.game-2048-units').append($img);
             if (!!!c) return;
             $img.bind('load', function() {
@@ -662,5 +671,8 @@
             }
             alert('小可爱，再来一局吧，再努力回忆一下我们共度的时光');
         }
+
     </script>
-</body></html>
+</body>
+
+</html>
