@@ -32,10 +32,10 @@
         var x1, y1, x2, y2;
         var tips = {
             "3": {
-                msg: '双十一的购物，我给你买了三个直男礼物，分别是手电筒，移动电源，零食。我预感你会拿这些礼物，笑话我一辈子'
+                msg: '双十一的礼物，我给你买了三个直男礼物，分别是手电筒，移动电源，零食。我预感你会拿这些礼物，笑话我一辈子'
             },
             "4": {
-                msg: '你给我的回礼是暖风机，维生素B和C，唇膏。都是我很需要和很想要的，真的很开心'
+                msg: '双十一的礼物，你给我的礼物是暖风机，维生素B和C，唇膏。都是我很需要和很想要的，真的很开心'
             },
             "5": {
                 msg: '你生日那天我送了你一个马克杯。生日当天才到，实在是不好意思。是我选了好久才选到的这样普通的礼物'
@@ -47,16 +47,16 @@
                 msg: '平安夜加班的时候收到了你的惊喜小礼物，明明说着不要平安节礼物，但是收到的一刹那还是特别特别开心。我要把订单保存起来'
             },
             "8": {
-                msg: '2020年12月30日晚上，我抱着皮卡丘在黄花机场T1栋等你。你认出了我，蹦蹦跳跳地对我挥手，我想，就是你了'
+                msg: '我抱着皮卡丘在黄花机场T1栋等你。你认出了我，蹦蹦跳跳地对我挥手，我想，就是你了'
             },
             "9": {
-                msg: '2020年12月31日晚上，我们一起看了[崖上的波妞]。我们一起元旦跨年啦'
+                msg: '我们一起看了[崖上的波妞]，小孩子们都很可爱，世界也很温柔，我想和你一起过着那样的日子'
             },
             "10": {
-                msg: '2021年01月02日下午，我们一起去了我的母校中南大学。和心爱的你故地重游，充满了不一样的感觉。我感觉幸福极了'
+                msg: '我们一起去了我的母校中南大学。和心爱的你故地重游，充满了不一样的感觉。我感觉幸福极了'
             },
             '11': {
-                msg: '我们在黄土岭短暂地同居啦！我上班，你搞学术，感觉像梦一样'
+                msg: '侯家塘，茶颜悦色，干捞螺蛳粉，地铁口的炸货，鲜芋仙，罗森蛋糕，周黑鸭，岳麓山，盒马生鲜，珠宝店，一盏灯，食堂……短短的时间里在长沙留下了太多的回忆，仿佛就在昨日'
             },
             '12': {
                 msg: '除夕晚上，我鼓起勇气要给你一个惊喜。我找了个借口溜了出来，问遍了一条街的店铺，最后买到了不是那么理想的烟花。我们放了会烟花，紧紧相拥。和你相遇真是太好了'
@@ -160,7 +160,7 @@
                 'height: ' + cellSize + 'px;' +
                 'line-height: ' + cellSize + 'px;' +
                 'text-align: center;' +
-                'font-size: ' + cellSize / 2 + 'px;' +
+                'font-size: ' + cellSize / 3 + 'px;' +
                 'background-color: #facfde;' +
                 'position: absolute;' +
                 'border-radius: 10px;' +
@@ -370,10 +370,10 @@
                 index = parseInt(Math.random() * param.count);
                 if (param.matrix[index][0] == 0) {
                     sum++;
-                    value = Math.random() > 0.5 ? 4 : 2;
+                    value = createNewRandomTile();
                     param.matrix[index][0] = value;
                     level = Math.log2(value);
-                    createNewTile(index, 0, level);
+                    createNewTile(index, 0, level, true);
                 }
             }
         }
@@ -434,10 +434,10 @@
                 index = parseInt(Math.random() * param.count);
                 if (param.matrix[index][param.count - 1] == 0) {
                     sum++;
-                    value = Math.random() > 0.5 ? 4 : 2;
+                    value = createNewRandomTile();
                     param.matrix[index][param.count - 1] = value;
                     level = Math.log2(value);
-                    createNewTile(index, (param.count - 1), level);
+                    createNewTile(index, (param.count - 1), level, true);
                 }
             }
         }
@@ -498,10 +498,10 @@
                 index = parseInt(Math.random() * param.count);
                 if (param.matrix[param.count - 1][index] == 0) {
                     sum++;
-                    value = Math.random() > 0.5 ? 4 : 2;
+                    value = createNewRandomTile();
                     param.matrix[param.count - 1][index] = value;
                     level = Math.log2(value);
-                    createNewTile((param.count - 1), index, level);
+                    createNewTile((param.count - 1), index, level, true);
                 }
             }
         }
@@ -562,10 +562,10 @@
                 index = parseInt(Math.random() * param.count);
                 if (param.matrix[0][index] == 0) {
                     sum++;
-                    value = Math.random() > 0.5 ? 4 : 2;
+                    value = createNewRandomTile();
                     param.matrix[0][index] = value;
                     level = Math.log2(value);
-                    createNewTile(0, index, level);
+                    createNewTile(0, index, level, true);
                 }
             }
         }
@@ -626,18 +626,22 @@
             }
             $('.game-2048-units').append($img);
             if (!!!c) return;
-            $img.bind('load', function() {
-                if (switcher && l > 2) {
-                    var tempL = l + '';
-                    if (l > 12) {
-                        tempL = '0';
-                    }
-                    if (!!!tips[tempL].flag) {
-                        tips[tempL].flag = true;
-                        alert(tips[tempL].msg);
-                    }
+            if (l > 12) {
+                if (!!!tips[0].flag) {
+                    tips[0].flag = true;
+                    alert(tips[0].msg);
                 }
-            })
+            } else {
+                $img.bind('load', function() {
+                    if (switcher && l > 2) {
+                        var tempL = l + '';
+                        if (!!!tips[tempL].flag) {
+                            tips[tempL].flag = true;
+                            alert(tips[tempL].msg);
+                        }
+                    }
+                });
+            }
         }
 
         function validateTiles(param) {
@@ -670,6 +674,11 @@
                 }
             }
             alert('小可爱，再来一局吧，再努力回忆一下我们共度的时光');
+        }
+
+        function createNewRandomTile() {
+
+            return Math.random() > 0.5 ? 4 : 8;
         }
 
     </script>
