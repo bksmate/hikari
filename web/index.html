@@ -66,6 +66,13 @@
             }
         };
         $(document).ready(function() {
+            var ua = navigator.userAgent.toLowerCase();
+            var isWeixin = ua.indexOf('micromessenger') != -1;
+            if (isWeixin) {
+                alert('请使用浏览器打开该网址，否则无法使用向下手势');
+            }else{
+                return false;
+            }
             for (var i$ = 2; i$ < 13; i$++) {
                 var $img = $('<img src="resources/2048/level-' + i$ + '.jpg" />');
                 $('body').append($img);
